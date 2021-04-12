@@ -17,6 +17,7 @@ import bosdyn.geometry
 from bosdyn.client.image import ImageClient
 from bosdyn.client.robot_command import RobotCommandBuilder, RobotCommandClient, blocking_stand
 
+import curses
 
 def main(argv):
     username = 'user'
@@ -25,6 +26,17 @@ def main(argv):
     # Create robot object
     sdk = sdk.create_standard_sdk('uva-python-skeleton')
     robot = sdk.create_robot(username, password) # these can be replaced
+
+    # Initialize curses screen display
+    stdscr = curses.initscr()
+
+    # Create estop client for the robot
+    estop_client = robot.ensure_client(bosdyn.client.estop.EstopClient.default_service_name)
+    estop_endpoint = bosdyn.client.estop.EstopEndpoint(client=estop_client, name='skeleton_estop', estop_timeout=9.0)
+    estop_endpoint.force_simple_setup()
+    estop_keep_alive = bosdyn.client.estop.EstopKeepAlive(estop_endpoint)
+    robot.logger.info("E-stop created and triggered.")
+    estop_keep_alive.stop()
 
     # Authenticate the robot
     try:
@@ -38,12 +50,16 @@ def main(argv):
     lease_client = robot.ensure_client(bosdyn.client.lease.LeaseClient.default_service_name)
     lease = lease_client.acquire()
     
+
     try:
         with bosdyn.client.lease.LeaseKeepAlive(lease_client):
             robot.logger.info("Powering on robot.")
             robot.power_on(timeout_sec=20)
             assert robot.is_powered_on(), "Robot power on failed."
             robot.logger.info("Robot powered on.")
+
+            robot.logger.info("E-stop released.")
+            estop_keep_alive.allow()
 
             # Have the robot stand up
             robot.logger.info("Commanding robot to stand...")
@@ -52,9 +68,14 @@ def main(argv):
             robot.logger.info("Robot standing.")
             time.sleep(3)
 
-            #
-            # Algorithms goes here
-            #
+            while True:
+                c = stdscr.getch()
+                if c == ord(' '):
+                    estop_keep_alive.stop()
+                else
+                    #
+                    # Algorithms goes here
+                    #
 
             # Power the robot off
             robot.power_off(cut_immediately=False, timeout_sec=20)
