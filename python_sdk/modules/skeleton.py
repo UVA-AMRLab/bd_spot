@@ -1,10 +1,10 @@
-# Copyright (c) 2021 Boston Dynamics, Inc.  All rights reserved.
-#
-# Downloading, reproducing, distributing or otherwise using the SDK Software
-# is subject to the terms and conditions of the Boston Dynamics Software
-# Development Kit License (20191101-BDSDK-SL).
-
-"""Tutorial to show how to use the Boston Dynamics API"""
+"""
+Author: Shijie Gao
+Copyright: Copyright 2021, UVA AMR Spot
+Version: 1.0.1
+Date: Apr. 12 2021
+Status: under developing
+"""
 from __future__ import print_function
 import sys
 import time
