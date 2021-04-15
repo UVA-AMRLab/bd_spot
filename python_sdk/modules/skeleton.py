@@ -72,6 +72,7 @@ def main(argv):
                 c = stdscr.getch()
                 if c == ord(' '):
                     estop_keep_alive.stop()
+                    break
                 else
                     #
                     # Algorithms goes here
