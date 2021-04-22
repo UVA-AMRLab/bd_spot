@@ -46,7 +46,7 @@ def main():
     estop_endpoint.force_simple_setup()
     estop_keep_alive = bosdyn.client.estop.EstopKeepAlive(estop_endpoint)
 
-    pdb.set_trace()
+    # pdb.set_trace()
 
     robot.logger.info("E-stop created and realeased.")
     estop_keep_alive.allow()
@@ -69,18 +69,49 @@ def main():
     robot.logger.info("Robot standing.")
     time.sleep(1)
 
-    pdb.set_trace()
+    # pdb.set_trace()
     stdscr = curses.initscr()
     try:
             with bosdyn.client.lease.LeaseKeepAlive(lease_client):
                 while True:
                     c = stdscr.getch()
                     if c == ord(' '):
-                        estop_keep_alive.settle_then_cut()        
-                    else:
-                        pass
-                        # HERE GOES THE WONDERFUL CODES
+                        # stdscr.keypad(False)
+                        # curses.echo()
+                        # stdscr.nodelay(False)
+                        # curses.endwin()
+                        estop_keep_alive.settle_then_cut()
+                        break
+                    elif c == ord('e'):
+                        #
+                        # Algorithms goes here
+                        #
+                        print("rotating to right")
 
+                        cmd = RobotCommandBuilder.synchro_velocity_command(v_x=0.0, v_y=0.0, v_rot=-0.2)
+                        command_client.robot_command(cmd,end_time_secs=time.time()+0.6)
+                        # robot.logger.info("Robot standing twisted.")
+                        # time.sleep(1.5)
+                    elif c == ord('w'):
+                        print("forward")
+                        cmd = RobotCommandBuilder.synchro_velocity_command(v_x=0.2, v_y=0.0, v_rot=0.0)
+                        command_client.robot_command(cmd,end_time_secs=time.time()+0.1)
+                    elif c == ord('s'):
+                        print("back")
+                        cmd = RobotCommandBuilder.synchro_velocity_command(v_x=-0.2, v_y=0.0, v_rot=0.0)
+                        command_client.robot_command(cmd,end_time_secs=time.time()+0.1)
+                    elif c == ord('a'):
+                        print("right")
+                        cmd = RobotCommandBuilder.synchro_velocity_command(v_x=0.0, v_y=0.2, v_rot=0.0)
+                        command_client.robot_command(cmd,end_time_secs=time.time()+0.1)
+                    elif c == ord('d'):
+                        print("left")
+                        cmd = RobotCommandBuilder.synchro_velocity_command(v_x=0.0, v_y=-0.2, v_rot=0.0)
+                        command_client.robot_command(cmd,end_time_secs=time.time()+0.1)
+
+                    else:
+                        print("isrunning")
+                        pass
             # Power the robot off. By specifying "cut_immediately=False", a safe power off command
             # is issued to the robot. This will attempt to sit the robot before powering off.     
             robot.power_off(cut_immediately=False, timeout_sec=20)
@@ -89,6 +120,11 @@ def main():
     finally:
         # If we successfully acquired a lease, return it.
         lease_client.return_lease(lease)
+        stdscr.keypad(False)
+        curses.echo()
+        stdscr.nodelay(False)
+        curses.endwin()
+    
 
 if __name__ == '__main__':
     main()
